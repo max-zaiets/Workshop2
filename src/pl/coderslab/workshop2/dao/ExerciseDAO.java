@@ -1,54 +1,52 @@
 package pl.coderslab.workshop2.dao;
 
-import pl.coderslab.workshop2.model.User;
+import pl.coderslab.workshop2.model.Exercise;
 import pl.coderslab.workshop2.utils.GetConnection;
 
 import java.sql.*;
 import java.util.Arrays;
 
 public class ExerciseDAO {
-    private static final String CREATE_USER_QUERY =
-            "INSERT INTO users(username, email, password) VALUES (?, ?, ?)";
-    private static final String READ_USER_QUERY =
-            "SELECT * FROM users where id = ?";
-    private static final String UPDATE_USER_QUERY =
-            "UPDATE users SET username = ?, email = ?, password = ? where id = ?";
-    private static final String DELETE_USER_QUERY =
-            "DELETE FROM users WHERE id = ?";
-    private static final String FIND_ALL_USERS_QUERY =
-            "SELECT * FROM users";
+    private static final String CREATE_EXERCISE_QUERY =
+            "INSERT INTO exercises(title, description) VALUES (?, ?)";
+    private static final String READ_EXERCISE_QUERY =
+            "SELECT * FROM exercises where id = ?";
+    private static final String UPDATE_EXERCISES_QUERY =
+            "UPDATE users SET title = ?, description = ?, where id = ?";
+    private static final String DELETE_EXERCISE_QUERY =
+            "DELETE FROM exercises WHERE id = ?";
+    private static final String FIND_ALL_EXERCISES_QUERY =
+            "SELECT * FROM exercises";
 
-    public User create(User user) {
+    public Exercise create(Exercise exercise) {
         try (Connection conn = GetConnection.getConnection()) {
             PreparedStatement statement =
-                    conn.prepareStatement(CREATE_USER_QUERY, Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, user.getUsername());
-            statement.setString(2, user.getEmail());
-            statement.setString(3, user.getPassword());
+                    conn.prepareStatement(CREATE_EXERCISE_QUERY, Statement.RETURN_GENERATED_KEYS);
+            statement.setString(1, exercise.getTitle());
+            statement.setString(2, exercise.getDescription());
             statement.executeUpdate();
             ResultSet resultSet = statement.getGeneratedKeys();
             if (resultSet.next()) {
-                user.setId(resultSet.getInt(1));
+                exercise.setId(resultSet.getInt(1));
             }
-            return user;
+            return exercise;
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public User read(int userId) {
+    public Exercise read(int exerciseId) {
         try (Connection conn = GetConnection.getConnection()) {
-            PreparedStatement statement = conn.prepareStatement(READ_USER_QUERY);
-            statement.setInt(1, userId);
+            PreparedStatement statement = conn.prepareStatement(READ_EXERCISE_QUERY);
+            statement.setInt(1, exerciseId);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                User user = new User();
-                user.setId(resultSet.getInt("id"));
-                user.setUsername(resultSet.getString("username"));
-                user.setEmail(resultSet.getString("email"));
-                user.setPassword(resultSet.getString("password"));
-                return user;
+                Exercise exercise = new Exercise();
+                exercise.setId(resultSet.getInt("id"));
+                exercise.setTitle(resultSet.getString("title"));
+                exercise.setDescription(resultSet.getString("description"));
+                return exercise;
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -56,53 +54,51 @@ public class ExerciseDAO {
         return null;
     }
 
-    public void update(User user) {
+    public void update(Exercise exercise) {
         try (Connection conn = GetConnection.getConnection()) {
-            PreparedStatement statement = conn.prepareStatement(UPDATE_USER_QUERY);
-            statement.setString(1, user.getUsername());
-            statement.setString(2, user.getEmail());
-            statement.setString(3, user.getPassword());
-            statement.setInt(4, user.getId());
+            PreparedStatement statement = conn.prepareStatement(UPDATE_EXERCISES_QUERY);
+            statement.setString(1, exercise.getTitle());
+            statement.setString(2, exercise.getDescription());
+            statement.setInt(3, exercise.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void delete(User user){
-        delete(user.getId());
+    public void delete(Exercise exercise){
+        delete(exercise.getId());
     }
 
-    public void delete(int userId) {
+    public void delete(int exerciseId) {
         try (Connection conn = GetConnection.getConnection()) {
-            PreparedStatement statement = conn.prepareStatement(DELETE_USER_QUERY);
-            statement.setInt(1, userId);
+            PreparedStatement statement = conn.prepareStatement(DELETE_EXERCISE_QUERY);
+            statement.setInt(1, exerciseId);
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    private User[] addToArray(User u, User[] users) {
-        User[] tmpUsers = Arrays.copyOf(users, users.length + 1);
-        tmpUsers[users.length] = u;
-        return tmpUsers;
+    private Exercise[] addToArray(Exercise e, Exercise[] exercises) {
+        Exercise[] tmpExercises = Arrays.copyOf(exercises, exercises.length + 1);
+        tmpExercises[exercises.length] = e;
+        return tmpExercises;
     }
 
-    public User[] findAll() {
+    public Exercise[] findAll() {
         try (Connection conn = GetConnection.getConnection()) {
-            User[] users = new User[0];
-            PreparedStatement statement = conn.prepareStatement(FIND_ALL_USERS_QUERY);
+            Exercise[] exercises = new Exercise[0];
+            PreparedStatement statement = conn.prepareStatement(FIND_ALL_EXERCISES_QUERY);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                User user = new User();
-                user.setId(resultSet.getInt("id"));
-                user.setUsername(resultSet.getString("username"));
-                user.setEmail(resultSet.getString("email"));
-                user.setPassword(resultSet.getString("password"));
-                users = addToArray(user, users);
+                Exercise exercise = new Exercise();
+                exercise.setId(resultSet.getInt("id"));
+                exercise.setTitle(resultSet.getString("title"));
+                exercise.setDescription(resultSet.getString("description"));
+                exercises = addToArray(exercise, exercises);
             }
-            return users;
+            return exercises;
         } catch (SQLException e) {
             e.printStackTrace(); return null;
         }}

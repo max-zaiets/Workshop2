@@ -1,5 +1,7 @@
 package pl.coderslab.workshop2.dao;
 
+import pl.coderslab.workshop2.model.Exercise;
+import pl.coderslab.workshop2.model.Solution;
 import pl.coderslab.workshop2.model.User;
 import pl.coderslab.workshop2.utils.GetConnection;
 
@@ -7,48 +9,53 @@ import java.sql.*;
 import java.util.Arrays;
 
 public class SolutionDAO {
-    private static final String CREATE_USER_QUERY =
-            "INSERT INTO users(username, email, password) VALUES (?, ?, ?)";
-    private static final String READ_USER_QUERY =
-            "SELECT * FROM users where id = ?";
-    private static final String UPDATE_USER_QUERY =
-            "UPDATE users SET username = ?, email = ?, password = ? where id = ?";
-    private static final String DELETE_USER_QUERY =
-            "DELETE FROM users WHERE id = ?";
-    private static final String FIND_ALL_USERS_QUERY =
-            "SELECT * FROM users";
+    private static final String CREATE_SOLUTION_QUERY =
+            "INSERT INTO solutions(created, updated, description) VALUES (?, ?, ?)";
+    private static final String READ_SOLUTION_QUERY =
+            "SELECT * FROM solutions where id = ?";
+    private static final String UPDATE_SOLUTION_QUERY =
+            "UPDATE users SET created = ?, updated = ?, description = ? where id = ?";
+    private static final String DELETE_SOLUTION_QUERY =
+            "DELETE FROM solutions WHERE id = ?";
+    private static final String FIND_ALL_SOLUTION_QUERY =
+            "SELECT * FROM solutions";
+    private static final String FIND_ALL_SOLUTION_BY_USER_ID_QUERY =
+            "SELECT * FROM solutions WHERE user_id = ?";
+    private static final String FIND_ALL_SOLUTION_BY_EXERCISE_ID_QUERY =
+            "SELECT * FROM solutions WHERE exercise_id = ?";
 
-    public User create(User user) {
+
+    public Solution create(Solution solution) {
         try (Connection conn = GetConnection.getConnection()) {
             PreparedStatement statement =
-                    conn.prepareStatement(CREATE_USER_QUERY, Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, user.getUsername());
-            statement.setString(2, user.getEmail());
-            statement.setString(3, user.getPassword());
+                    conn.prepareStatement(CREATE_SOLUTION_QUERY, Statement.RETURN_GENERATED_KEYS);
+            statement.setDate(1, (Date) solution.getCreated());
+            statement.setDate(2, (Date) solution.getUpdated());
+            statement.setString(3, solution.getDescription());
             statement.executeUpdate();
             ResultSet resultSet = statement.getGeneratedKeys();
             if (resultSet.next()) {
-                user.setId(resultSet.getInt(1));
+                solution.setId(resultSet.getInt(1));
             }
-            return user;
+            return solution;
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public User read(int userId) {
+    public Solution read(int solutionId) {
         try (Connection conn = GetConnection.getConnection()) {
-            PreparedStatement statement = conn.prepareStatement(READ_USER_QUERY);
-            statement.setInt(1, userId);
+            PreparedStatement statement = conn.prepareStatement(READ_SOLUTION_QUERY);
+            statement.setInt(1, solutionId);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                User user = new User();
-                user.setId(resultSet.getInt("id"));
-                user.setUsername(resultSet.getString("username"));
-                user.setEmail(resultSet.getString("email"));
-                user.setPassword(resultSet.getString("password"));
-                return user;
+                Solution solution = new Solution();
+                solution.setId(resultSet.getInt("id"));
+                solution.setCreated(resultSet.getDate("created"));
+                solution.setUpdated(resultSet.getDate("updated"));
+                solution.setDescription(resultSet.getString("description"));
+                return solution;
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -56,55 +63,102 @@ public class SolutionDAO {
         return null;
     }
 
-    public void update(User user) {
+    public void update(Solution solution) {
         try (Connection conn = GetConnection.getConnection()) {
-            PreparedStatement statement = conn.prepareStatement(UPDATE_USER_QUERY);
-            statement.setString(1, user.getUsername());
-            statement.setString(2, user.getEmail());
-            statement.setString(3, user.getPassword());
-            statement.setInt(4, user.getId());
+            PreparedStatement statement = conn.prepareStatement(UPDATE_SOLUTION_QUERY);
+            statement.setDate(1, (Date) solution.getCreated());
+            statement.setDate(2, (Date) solution.getUpdated());
+            statement.setString(3, solution.getDescription());
+            statement.setInt(4, solution.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void delete(User user){
-        delete(user.getId());
+    public void delete(Solution solution) {
+        delete(solution.getId());
     }
 
-    public void delete(int userId) {
+    public void delete(int solutionId) {
         try (Connection conn = GetConnection.getConnection()) {
-            PreparedStatement statement = conn.prepareStatement(DELETE_USER_QUERY);
-            statement.setInt(1, userId);
+            PreparedStatement statement = conn.prepareStatement(DELETE_SOLUTION_QUERY);
+            statement.setInt(1, solutionId);
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    private User[] addToArray(User u, User[] users) {
-        User[] tmpUsers = Arrays.copyOf(users, users.length + 1);
-        tmpUsers[users.length] = u;
-        return tmpUsers;
+    private Solution[] addToArray(Solution s, Solution[] solutions) {
+        Solution[] tmpSolutions = Arrays.copyOf(solutions, solutions.length + 1);
+        tmpSolutions[solutions.length] = s;
+        return tmpSolutions;
     }
 
-    public User[] findAll() {
+    public Solution[] findAll() {
         try (Connection conn = GetConnection.getConnection()) {
-            User[] users = new User[0];
-            PreparedStatement statement = conn.prepareStatement(FIND_ALL_USERS_QUERY);
+            Solution[] solutions = new Solution[0];
+            PreparedStatement statement = conn.prepareStatement(FIND_ALL_SOLUTION_QUERY);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                User user = new User();
-                user.setId(resultSet.getInt("id"));
-                user.setUsername(resultSet.getString("username"));
-                user.setEmail(resultSet.getString("email"));
-                user.setPassword(resultSet.getString("password"));
-                users = addToArray(user, users);
+                Solution solution = new Solution();
+                solution.setId(resultSet.getInt("id"));
+                solution.setCreated(resultSet.getDate("created"));
+                solution.setUpdated(resultSet.getDate("updated"));
+                solution.setDescription(resultSet.getString("description"));
+                solutions = addToArray(solution, solutions);
             }
-            return users;
-        } catch (SQLException e) {
-            e.printStackTrace(); return null;
-        }}
+            return solutions;
 
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    public Solution[] findAllByUserId(User user) throws SQLException {
+        try (Connection conn = GetConnection.getConnection()) {
+            Solution[] solutions = new Solution[0];
+            PreparedStatement statement = conn.prepareStatement(FIND_ALL_SOLUTION_BY_USER_ID_QUERY);
+            statement.setInt(1, user.getId());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Solution solution = new Solution();
+                solution.setId(resultSet.getInt("id"));
+                solution.setCreated(resultSet.getDate("created"));
+                solution.setUpdated(resultSet.getDate("updated"));
+                solution.setDescription(resultSet.getString("description"));
+                solutions = addToArray(solution, solutions);
+            }
+            return solutions;
+
+        }catch(SQLException e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Solution[] findAllByExerciseId(Exercise exercise) throws SQLException {
+        try (Connection conn = GetConnection.getConnection()) {
+            Solution[] solutions = new Solution[0];
+            PreparedStatement statement = conn.prepareStatement(FIND_ALL_SOLUTION_BY_EXERCISE_ID_QUERY);
+            statement.setInt(1, exercise.getId());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Solution solution = new Solution();
+                solution.setId(resultSet.getInt("id"));
+                solution.setCreated(resultSet.getDate("created"));
+                solution.setUpdated(resultSet.getDate("updated"));
+                solution.setDescription(resultSet.getString("description"));
+                solutions = addToArray(solution, solutions);
+            }
+            return solutions;
+
+        }catch(SQLException e){
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

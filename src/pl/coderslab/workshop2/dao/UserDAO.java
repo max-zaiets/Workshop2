@@ -1,6 +1,7 @@
 package pl.coderslab.workshop2.dao;
 
 import pl.coderslab.workshop2.model.User;
+import pl.coderslab.workshop2.model.UsersGroups;
 import pl.coderslab.workshop2.utils.GetConnection;
 
 import java.sql.*;
@@ -17,6 +18,8 @@ public class UserDAO {
             "DELETE FROM users WHERE id = ?";
     private static final String FIND_ALL_USERS_QUERY =
             "SELECT * FROM users";
+    private static final String FIND_ALL_USERS_BY_USERS_GROUP_ID_QUERY =
+            "SELECT * FROM users WHERE user_group_id = ?";
 
 
     public User create(User user) {
@@ -107,4 +110,24 @@ public class UserDAO {
         } catch (SQLException e) {
             e.printStackTrace(); return null;
         }}
+
+    public User[] findAllByGroupId(UsersGroups usersGroup){
+        try (Connection conn = GetConnection.getConnection()) {
+            User[] users = new User[0];
+            PreparedStatement statement = conn.prepareStatement(FIND_ALL_USERS_BY_USERS_GROUP_ID_QUERY);
+            statement.setInt(1, usersGroup.getId());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                User user = new User();
+                user.setId(resultSet.getInt("id"));
+                user.setUsername(resultSet.getString("username"));
+                user.setEmail(resultSet.getString("email"));
+                user.setPassword(resultSet.getString("password"));
+                users = addToArray(user, users);
+            }
+            return users;
+        } catch (SQLException e) {
+            e.printStackTrace(); return null;
+        }
+    }
 }

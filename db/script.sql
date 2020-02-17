@@ -11,7 +11,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE users_groups(
-    id INT (11),
+    id INT (11) AUTO_INCREMENT,
     name VARCHAR(255),
     PRIMARY KEY (id)
 );
@@ -29,8 +29,9 @@ CREATE TABLE solutions (
 );
 
 CREATE TABLE exercises(
- id INT (11),
+ id INT (11) AUTO_INCREMENT,
  title VARCHAR(255),
  description TEXT,
  PRIMARY KEY (id)
 );
+
